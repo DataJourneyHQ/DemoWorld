@@ -1,4 +1,4 @@
-# academy_demo
+# Exciting Demos
 
 ### 25th March CrewAI
 
