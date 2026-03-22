@@ -44,6 +44,7 @@ jobs:
         working-directory: crewAI_discover_oss_project
         env:
           GITHUB_TOKEN: ${{ secrets.GH_MODELS_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.GH_MODELS_TOKEN }}
           SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
           CREW_CRITERIA: ${{ github.event.inputs.criteria }}
           CREW_PROGRAMMING_LANGUAGES: ${{ github.event.inputs.programming_languages }}

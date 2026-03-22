@@ -18,9 +18,7 @@ def _make_llm(**kwargs) -> LLM:
     if github_token:
         kwargs["api_key"] = github_token
         kwargs["base_url"] = "https://models.inference.ai.azure.com"
-        # swap openai/ prefix → github_ai/ so LiteLLM routes correctly
-        if "model" in kwargs and kwargs["model"].startswith("openai/"):
-            kwargs["model"] = kwargs["model"].replace("openai/", "github_ai/", 1)
+        # keep openai/ prefix — LiteLLM routes correctly via base_url
     return LLM(**kwargs)
 
 @CrewBase
