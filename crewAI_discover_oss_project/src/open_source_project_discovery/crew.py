@@ -12,6 +12,16 @@ from crewai_tools import (
 from pydantic import BaseModel
 from jambo import SchemaConverter
 
+def _make_llm(**kwargs) -> LLM:
+    """Build an LLM instance, honouring GitHub Models env vars when present."""
+    base_url = os.environ.get("OPENAI_API_BASE")
+    api_key  = os.environ.get("OPENAI_API_KEY")
+    if base_url:
+        kwargs["base_url"] = base_url
+    if api_key:
+        kwargs["api_key"] = api_key
+    return LLM(**kwargs)
+
 @CrewBase
 class OpenSourceProjectDiscoveryCrew:
     """OpenSourceProjectDiscovery crew"""
@@ -35,11 +45,7 @@ class OpenSourceProjectDiscoveryCrew:
             
             
             max_execution_time=None,
-            llm=LLM(
-                model="openai/gpt-4o-mini",
-                temperature=0.7,
-                
-            ),
+            llm=_make_llm(model="openai/gpt-4o-mini", temperature=0.7),
             response_format=self._load_response_format("open_source_project_discovery_specialist"),
         )
     
@@ -63,7 +69,7 @@ class OpenSourceProjectDiscoveryCrew:
             tasks=self.tasks,  # Automatically created by the @task decorator
             process=Process.sequential,
             verbose=True,
-            chat_llm=LLM(model="openai/gpt-4o-mini"),
+            chat_llm=_make_llm(model="openai/gpt-4o-mini"),
         )
 
 
