@@ -37,7 +37,8 @@ jobs:
         run: uv sync
 
       - name: Install markdown converter
-        run: pip install markdown
+        working-directory: crewAI_discover_oss_project
+        run: uv add markdown
 
       - name: Run CrewAI agent
         working-directory: crewAI_discover_oss_project
