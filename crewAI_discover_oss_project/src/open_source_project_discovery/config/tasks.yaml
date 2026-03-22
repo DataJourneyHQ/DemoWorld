@@ -1,0 +1,29 @@
+---
+discover_and_evaluate_open_source_projects:
+  description: |-
+    Research and identify the top open source projects suitable for contribution based on the specified criteria: {criteria}. Focus on projects in {programming_languages} and {project_types}. For each project, analyze:
+
+    1. **Project Health**: Recent commit activity, issue resolution rate, release frequency
+    2. **Community Engagement**: Number of contributors, stars, forks, discussion activity
+    3. **Beginner-Friendliness**: Documentation quality, "good first issue" labels, contributing guides
+    4. **Technical Quality**: Code structure, test coverage, CI/CD setup
+    5. **Contribution Opportunities**: Open issues, feature requests, documentation needs
+
+    Use web search to find projects on GitHub, GitLab, and other platforms. Visit project repositories to assess their current state and contribution potential.
+  expected_output: |-
+    A comprehensive report in markdown format containing:
+
+    1. **Executive Summary**: Top 3-5 recommended projects with brief rationale
+    2. **Detailed Project Analysis**: For each recommended project, include:
+       - Project name, URL, and description
+       - Programming language(s) and tech stack
+       - Community metrics (stars, forks, contributors)
+       - Recent activity indicators
+       - Contribution difficulty level (Beginner/Intermediate/Advanced)
+       - Specific contribution opportunities available
+       - Getting started resources and links
+    3. **Contribution Roadmap**: Step-by-step guide for getting started with contributions
+    4. **Additional Resources**: Links to open source contribution guides and communities
+
+    Format the report with clear headings, bullet points, and actionable recommendations.
+  agent: open_source_project_discovery_specialist
