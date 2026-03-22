@@ -43,12 +43,8 @@ jobs:
       - name: Run CrewAI agent
         working-directory: crewAI_discover_oss_project
         env:
-          # GitHub token used as the API key for the Copilot model endpoint
-          OPENAI_API_KEY: ${{ secrets.GH_MODELS_TOKEN }}
-          OPENAI_API_BASE: "https://models.inference.ai.azure.com"
-          # Serper key for the SerperDevTool (web search)
+          GITHUB_TOKEN: ${{ secrets.GH_MODELS_TOKEN }}
           SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
-          # Crew inputs passed as env vars and picked up in main.py
           CREW_CRITERIA: ${{ github.event.inputs.criteria }}
           CREW_PROGRAMMING_LANGUAGES: ${{ github.event.inputs.programming_languages }}
           CREW_PROJECT_TYPES: ${{ github.event.inputs.project_types }}

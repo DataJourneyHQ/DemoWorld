@@ -14,12 +14,13 @@ from jambo import SchemaConverter
 
 def _make_llm(**kwargs) -> LLM:
     """Build an LLM instance, honouring GitHub Models env vars when present."""
-    base_url = os.environ.get("OPENAI_API_BASE")
-    api_key  = os.environ.get("OPENAI_API_KEY")
-    if base_url:
-        kwargs["base_url"] = base_url
-    if api_key:
-        kwargs["api_key"] = api_key
+    github_token = os.environ.get("GITHUB_TOKEN")
+    if github_token:
+        kwargs["api_key"] = github_token
+        kwargs["base_url"] = "https://models.inference.ai.azure.com"
+        # swap openai/ prefix → github_ai/ so LiteLLM routes correctly
+        if "model" in kwargs and kwargs["model"].startswith("openai/"):
+            kwargs["model"] = kwargs["model"].replace("openai/", "github_ai/", 1)
     return LLM(**kwargs)
 
 @CrewBase
