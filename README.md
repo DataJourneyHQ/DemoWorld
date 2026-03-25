@@ -1,9 +1,12 @@
 # Exciting Demos
 
-### 25th March CrewAI
-
 <img width="2878" height="1786" alt="Screenshot 2026-03-19 at 12 59 31 PM" src="https://github.com/user-attachments/assets/efa7b04e-dce2-43c4-97dd-c269ff269d94" />
 
+
+### 25th March CrewAI Demos 
+
+1. OSS Discovery + Deployed via GitHub Action @sayantikabanik
+2. API-first asset librarian for local-first document and image similarity analysis. https://github.com/arcnem-ai/omnivec @Kthom1
 ---
 
 ## GitHub Actions — CrewAI OSS Discovery Agent
