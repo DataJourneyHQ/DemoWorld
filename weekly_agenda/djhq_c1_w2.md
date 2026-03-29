@@ -66,7 +66,6 @@ Rey will walk us through how to build real user facing experiences powered by LL
 | 🎨 | How to think about UI design when the output is generative and unpredictable |
 | ⚡ | Streaming responses so the interface feels fast and responsive |
 | 🧩 | Structuring LLM output so it is renderable and useful in a UI context |
-| 🛠️ | A live build — watch Rey put something together from scratch |
 
 ---
 
