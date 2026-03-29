@@ -25,7 +25,7 @@ We will open with a quick look back at what we covered last week and give everyo
 | 📝 | Writing your first scripts and how to think about a script as a single focused unit of work |
 | 🌐 | Making API calls in GitHub Actions and turning a local script into something that runs in CI |
 | 🔍 | Reading API responses and understanding what the data actually looks like |
-| 🧪 | What happens when things go wrong — error handling and how to debug API calls |
+| 🧪 | trace setup and logging |
 | ☕ | Office hours for any questions, blockers or anything you need clarity on |
 
 ---
