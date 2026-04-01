@@ -88,7 +88,7 @@ A side-by-side comparison of an **open source model** (`gpt-oss-120b` via Huggin
 ```
 prompt_process_trace_setup/
 ├── __init__.py
-├── .env.example                    ← GITHUB_TOKEN, HF_TOKEN, DEEPEVAL_API_KEY
+├── .env.example                    ← GITHUB_TOKEN, HF_TOKEN, DEEPEVAL_API_KEY (read instructions carefully)
 ├── requirements.txt
 │
 ├── prompt/
