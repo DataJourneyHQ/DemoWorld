@@ -1,6 +1,6 @@
 # Exciting Demos
 
-<img width="2878" height="1786" alt="Screenshot 2026-03-19 at 12 59 31 PM" src="https://github.com/user-attachments/assets/efa7b04e-dce2-43c4-97dd-c269ff269d94" />
+<img width="878" height="786" alt="Screenshot 2026-03-19 at 12 59 31 PM" src="https://github.com/user-attachments/assets/efa7b04e-dce2-43c4-97dd-c269ff269d94" />
 
 
 ### 25th March CrewAI Demos 
@@ -63,6 +63,9 @@ The output **looks completely valid** — proper markdown, real project names, G
 ---
 
 ### 1st april <> OSS vs Commercial LLM Evaluation
+<img width="2572" height="500" alt="Screenshot 2026-04-01 at 9 39 30 AM" src="https://github.com/user-attachments/assets/6d716417-a3cb-4d8e-8250-a36f1f698bd9" />
+
+
 
 A side-by-side comparison of an **open source model** (`gpt-oss-120b` via HuggingFace router) vs a **commercial GitHub Model** (selected dynamically from the live catalog) on a creative + science-heavy prompt — a movie review of *Project Hail Mary* by Andy Weir.
 
@@ -72,9 +75,9 @@ A side-by-side comparison of an **open source model** (`gpt-oss-120b` via Huggin
 |------|-------------|
 | **1. Prompt** | Structured movie review task in `prompt/prompt.md` — narrative writing, character analysis, science accuracy, comparative reasoning |
 | **2. Evaluate** | `evaluate/prompt_evaluator.py` calls the [DataJourneyHQ/list-github-models](https://github.com/DataJourneyHQ/list-github-models) action API (`https://models.github.ai/catalog/models`), fetches the live catalog, scores every model against the prompt context and picks the best commercial model |
-| **3. OSS run** | `scripts/run_oss.py` — runs `openai/gpt-oss-120b:novita` via HuggingFace router with `@observe()` tracing |
-| **4. Commercial run** | `scripts/run_commercial.py` — calls the evaluator first, then runs the winning GitHub Model via `https://models.inference.ai.azure.com` with `@observe()` tracing |
-| **5. Trace** | `pipeline_execute/trace_setup.py` — configures [deepeval](https://github.com/confident-ai/deepeval) tracing so both runs are captured side-by-side in the Confident AI dashboard |
+| **3. OSS run** | `scripts/run_oss.py` — runs `openai/gpt-oss-120b:novita` via HuggingFace router with |
+| **4. Commercial run** | `scripts/run_commercial.py` — calls the evaluator first, then runs the winning GitHub Model via `https://models.inference.ai.azure.com`|
+| **5. Trace** TODO | `pipeline_execute/trace_setup.py` — configures [deepeval](https://github.com/confident-ai/deepeval) tracing so both runs are captured side-by-side in the Confident AI dashboard |
 
 #### References
 - [DataJourneyHQ/list-github-models](https://github.com/DataJourneyHQ/list-github-models) — GitHub Action that fetches the live models catalog
