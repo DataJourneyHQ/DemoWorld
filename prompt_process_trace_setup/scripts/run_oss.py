@@ -12,10 +12,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from openai import OpenAI
-from deepeval.tracing import observe
+# from deepeval.tracing import observe  # TODO: re-enable once deepeval/pydantic compatibility is resolved
 from dotenv import load_dotenv
 
-load_dotenv(ROOT / ".env.example")
+load_dotenv(ROOT / ".env")
 
 MODEL_NAME  = "openai/gpt-oss-120b:novita"
 HF_ENDPOINT = "https://router.huggingface.co/v1"
@@ -28,7 +28,7 @@ def read_prompt() -> str:
     return PROMPT_FILE.read_text(encoding="utf-8")
 
 
-@observe()
+# @observe()  # TODO: re-enable once deepeval/pydantic compatibility is resolved
 def run_oss_model(prompt: str) -> str:
     client = OpenAI(
         base_url=HF_ENDPOINT,

@@ -14,11 +14,11 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from openai import OpenAI
-from deepeval.tracing import observe
+# from deepeval.tracing import observe
 from dotenv import load_dotenv
 from evaluate.prompt_evaluator import evaluate_and_pick
 
-load_dotenv(ROOT / ".env.example")
+load_dotenv("../.env")
 
 GITHUB_ENDPOINT = "https://models.inference.ai.azure.com"
 
@@ -30,14 +30,14 @@ def read_prompt() -> str:
     return PROMPT_FILE.read_text(encoding="utf-8")
 
 
-@observe()
+# @observe()
 def run_commercial_model(prompt: str, model_id: str) -> str:
     client = OpenAI(
         base_url=GITHUB_ENDPOINT,
         api_key=os.getenv("GITHUB_TOKEN"),
     )
     response = client.chat.completions.create(
-        model=model_id,
+        model=model_id.split("/")[1],  # GitHub Models expect model name without the "openai/" prefix
         messages=[
             {
                 "role": "system",
