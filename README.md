@@ -59,3 +59,65 @@ The output **looks completely valid** — proper markdown, real project names, G
 | **False confidence** | Report reads as authoritative with no warning it failed |
 | **CI shows green** | Nothing in the pipeline signals that tools broke |
 
+
+---
+
+### 31st March — OSS vs Commercial LLM Evaluation
+
+A side-by-side comparison of an **open source model** (`gpt-oss-120b` via HuggingFace router) vs a **commercial GitHub Model** (selected dynamically from the live catalog) on a creative + science-heavy prompt — a movie review of *Project Hail Mary* by Andy Weir.
+
+#### What it does
+
+| Step | What happens |
+|------|-------------|
+| **1. Prompt** | Structured movie review task in `prompt/prompt.md` — narrative writing, character analysis, science accuracy, comparative reasoning |
+| **2. Evaluate** | `evaluate/prompt_evaluator.py` calls the [DataJourneyHQ/list-github-models](https://github.com/DataJourneyHQ/list-github-models) action API (`https://models.github.ai/catalog/models`), fetches the live catalog, scores every model against the prompt context and picks the best commercial model |
+| **3. OSS run** | `scripts/run_oss.py` — runs `openai/gpt-oss-120b:novita` via HuggingFace router with `@observe()` tracing |
+| **4. Commercial run** | `scripts/run_commercial.py` — calls the evaluator first, then runs the winning GitHub Model via `https://models.inference.ai.azure.com` with `@observe()` tracing |
+| **5. Trace** | `pipeline_execute/trace_setup.py` — configures [deepeval](https://github.com/confident-ai/deepeval) tracing so both runs are captured side-by-side in the Confident AI dashboard |
+
+#### References
+- [DataJourneyHQ/list-github-models](https://github.com/DataJourneyHQ/list-github-models) — GitHub Action that fetches the live models catalog
+- [DataJourney analytics_framework](https://github.com/DataJourneyHQ/DataJourney/tree/main/analytics_framework) — trace setup + OSS prompt enhancer patterns used as base
+
+#### Directory structure
+
+```
+prompt_process_trace_setup/
+├── __init__.py
+├── .env.example                    ← GITHUB_TOKEN, HF_TOKEN, DEEPEVAL_API_KEY
+├── requirements.txt
+│
+├── prompt/
+│   └── prompt.md                   ← movie review prompt (Project Hail Mary)
+│
+├── evaluate/
+│   └── prompt_evaluator.py         ← fetches live GitHub Models catalog,
+│                                      scores models, picks best commercial one
+├── scripts/
+│   ├── run_oss.py                  ← gpt-oss-120b via HuggingFace router
+│   └── run_commercial.py           ← dynamically picked GitHub Model
+│
+└── pipeline_execute/
+    └── trace_setup.py              ← deepeval @observe tracing config
+```
+
+#### How to run
+
+```bash
+cd prompt_process_trace_setup
+
+# 1. install dependencies
+pip install -r requirements.txt
+
+# 2. copy and fill in your tokens
+cp .env.example .env
+
+# 3. run OSS model
+python scripts/run_oss.py
+
+# 4. run commercial model (evaluator picks the model automatically)
+python scripts/run_commercial.py
+```
+
+> Outputs are saved to `pipeline_execute/oss_output.md` and `pipeline_execute/commercial_output.md`
