@@ -62,7 +62,7 @@ The output **looks completely valid** — proper markdown, real project names, G
 
 ---
 
-### 31st March — OSS vs Commercial LLM Evaluation
+### 1st april <> OSS vs Commercial LLM Evaluation
 
 A side-by-side comparison of an **open source model** (`gpt-oss-120b` via HuggingFace router) vs a **commercial GitHub Model** (selected dynamically from the live catalog) on a creative + science-heavy prompt — a movie review of *Project Hail Mary* by Andy Weir.
 
