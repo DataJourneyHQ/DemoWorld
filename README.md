@@ -1,6 +1,10 @@
 # Exciting Demos
 
-<img width="878" height="786" alt="Screenshot 2026-03-19 at 12 59 31 PM" src="https://github.com/user-attachments/assets/efa7b04e-dce2-43c4-97dd-c269ff269d94" />
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/efa7b04e-dce2-43c4-97dd-c269ff269d94" width="45%" />
+  <img src="https://github.com/user-attachments/assets/994de359-1c91-450f-9189-9275621eb1af" width="45%" />
+</p>
+
 
 
 ### 25th March CrewAI Demos 
