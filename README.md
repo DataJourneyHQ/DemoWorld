@@ -67,64 +67,60 @@ The output **looks completely valid** — proper markdown, real project names, G
 ---
 
 ### 1st april <> OSS vs Commercial LLM Evaluation
-<img width="2572" height="500" alt="Screenshot 2026-04-01 at 9 39 30 AM" src="https://github.com/user-attachments/assets/6d716417-a3cb-4d8e-8250-a36f1f698bd9" />
 
+<img width="2572" height="500" alt="Screenshot 2026-04-01 at 9 39 30 AM" src="https://github.com/user-attachments/assets/6d716417-a3cb-4d8e-8250-a36f1f698bd9" />
 
+A Streamlit app that runs the **same prompt** against an OSS model (`gpt-oss-120b` via HuggingFace) and a **commercial GitHub Model** (picked dynamically from the live catalog), side by side — then logs every call for later inspection.
 
-A side-by-side comparison of an **open source model** (`gpt-oss-120b` via HuggingFace router) vs a **commercial GitHub Model** (selected dynamically from the live catalog) on a creative + science-heavy prompt — a movie review of *Project Hail Mary* by Andy Weir.
+**Deployed on [Railway](https://railway.app)** with a linked PostgreSQL service. Every run is written to the DB and, if `CONFIDENT_API_KEY` is set, mirrored to the Confident AI dashboard using the same `trace_id`.
 
-#### What it does
+#### Trace flow
 
-| Step | What happens |
-|------|-------------|
-| **1. Prompt** | Structured movie review task in `prompt/prompt.md` — narrative writing, character analysis, science accuracy, comparative reasoning |
-| **2. Evaluate** | `evaluate/prompt_evaluator.py` calls the [DataJourneyHQ/list-github-models](https://github.com/DataJourneyHQ/list-github-models) action API (`https://models.github.ai/catalog/models`), fetches the live catalog, scores every model against the prompt context and picks the best commercial model |
-| **3. OSS run** | `scripts/run_oss.py` — runs `openai/gpt-oss-120b:novita` via HuggingFace router with |
-| **4. Commercial run** | `scripts/run_commercial.py` — calls the evaluator first, then runs the winning GitHub Model via `https://models.inference.ai.azure.com`|
-| **5. Trace** TODO | `pipeline_execute/trace_setup.py` — configures [deepeval](https://github.com/confident-ai/deepeval) tracing so both runs are captured side-by-side in the Confident AI dashboard |
+```mermaid
+flowchart LR
+    U([👤 User]) --> APP
 
-#### References
-- [DataJourneyHQ/list-github-models](https://github.com/DataJourneyHQ/list-github-models) — GitHub Action that fetches the live models catalog
-- [DataJourney analytics_framework](https://github.com/DataJourneyHQ/DataJourney/tree/main/analytics_framework) — trace setup + OSS prompt enhancer patterns used as base
+    subgraph RW["☁️ Railway"]
+        APP[["app.py<br/>Streamlit UI"]]
+        TR{{"tracer.py<br/>log_llm_call()"}}
+        DB[("🐘 Postgres<br/>llm_runs")]
+        APP --> TR
+        TR -->|row + trace_id| DB
+    end
 
-#### Directory structure
-
-```
-prompt_process_trace_setup/
-├── __init__.py
-├── .env.example                    ← GITHUB_TOKEN, HF_TOKEN, DEEPEVAL_API_KEY (read instructions carefully)
-├── requirements.txt
-│
-├── prompt/
-│   └── prompt.md                   ← movie review prompt (Project Hail Mary)
-│
-├── evaluate/
-│   └── prompt_evaluator.py         ← fetches live GitHub Models catalog,
-│                                      scores models, picks best commercial one
-├── scripts/
-│   ├── run_oss.py                  ← gpt-oss-120b via HuggingFace router
-│   └── run_commercial.py           ← dynamically picked GitHub Model
-│
-└── pipeline_execute/
-    └── trace_setup.py              ← deepeval @observe tracing config
+    APP -->|call| HF["🔓 HF Router<br/>gpt-oss-120b"]
+    APP -->|call| GH["🏢 GitHub Models"]
+    TR -. optional mirror .-> CAI[["🧪 Confident AI"]]
 ```
 
-#### How to run
+**One call → two sinks, one shared `trace_id`.** Postgres is the source of truth; Confident AI is the dashboard layer.
+
+#### Run it locally
 
 ```bash
 cd prompt_process_trace_setup
-
-# 1. install dependencies
 pip install -r requirements.txt
-
-# 2. copy and fill in your tokens
-cp .env.example .env
-
-# 3. run OSS model
-python scripts/run_oss.py
-
-# 4. run commercial model (evaluator picks the model automatically)
-python scripts/run_commercial.py
+cp .env.example .env          # fill in GITHUB_TOKEN, HF_TOKEN, DATABASE_URL, (optional) CONFIDENT_API_KEY
+streamlit run app.py
 ```
 
-> Outputs are saved to `pipeline_execute/oss_output.md` and `pipeline_execute/commercial_output.md`
+#### Deploy on Railway
+
+1. New project → deploy from this repo (root `prompt_process_trace_setup/`)
+2. Add a **PostgreSQL** plugin → Railway injects `DATABASE_URL` automatically
+3. Set `GITHUB_TOKEN`, `HF_TOKEN`, and optionally `CONFIDENT_API_KEY` as service variables
+4. First request auto-creates the `llm_runs` table
+
+#### Key files
+
+| File | Purpose |
+|---|---|
+| `app.py` | Streamlit UI — single or side-by-side mode |
+| `tracer.py` | Unified logger — writes to Postgres + Confident AI |
+| `db.py` | Postgres schema + `log_run()` |
+| `evaluate/prompt_evaluator.py` | Fetches the live GitHub Models catalog and picks the best commercial model |
+| `prompt/prompt.md` | The test prompt (movie review of *Project Hail Mary*) |
+
+#### References
+- [DataJourneyHQ/list-github-models](https://github.com/DataJourneyHQ/list-github-models)
+- [deepeval / Confident AI](https://github.com/confident-ai/deepeval)
