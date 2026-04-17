@@ -1,5 +1,4 @@
-"""
-app.py — Streamlit UI for OSS vs Commercial LLM demo.
+"""app.py — Streamlit UI for OSS vs Commercial LLM demo.
 Supports single-model and side-by-side comparison modes.
 """
 import os
@@ -17,6 +16,27 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
 load_dotenv(ROOT / ".env")
+
+from db import init_db, log_run  # noqa: E402
+
+@st.cache_resource(show_spinner=False)
+def _db_ready() -> bool:
+    try:
+        init_db()
+        return True
+    except Exception as exc:
+        st.warning(f"DB logging disabled: {exc}")
+        return False
+
+DB_ON = _db_ready()
+
+def _safe_log(**kwargs) -> None:
+    if not DB_ON:
+        return
+    try:
+        log_run(**kwargs)
+    except Exception as exc:
+        st.toast(f"DB log failed: {exc}", icon="⚠️")
 
 # ── constants ─────────────────────────────────────────────────────────────────
 OSS_MODEL       = "openai/gpt-oss-120b:novita"
@@ -172,6 +192,15 @@ if mode == "Single model":
     if run:
         with st.spinner(f"Running `{model_id}` …"):
             output, err, elapsed = call_model(model_id, is_oss, prompt_text)
+        _safe_log(
+            model_id=model_id,
+            model_type="oss" if is_oss else "commercial",
+            prompt=prompt_text,
+            output=output,
+            error=err,
+            elapsed_sec=elapsed,
+            mode="single",
+        )
         if err:
             st.error(f"❌ {err}")
         else:
@@ -238,6 +267,19 @@ else:
                 fut_b = pool.submit(call_model, model_b, is_oss_b, prompt_text)
                 out_a, err_a, elapsed_a = fut_a.result()
                 out_b, err_b, elapsed_b = fut_b.result()
+
+        _safe_log(
+            model_id=model_a,
+            model_type="oss" if is_oss_a else "commercial",
+            prompt=prompt_text, output=out_a, error=err_a,
+            elapsed_sec=elapsed_a, mode="comparison",
+        )
+        _safe_log(
+            model_id=model_b,
+            model_type="oss" if is_oss_b else "commercial",
+            prompt=prompt_text, output=out_b, error=err_b,
+            elapsed_sec=elapsed_b, mode="comparison",
+        )
 
         st.divider()
         res_a, res_b = st.columns(2)
