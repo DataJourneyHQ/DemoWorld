@@ -18,7 +18,7 @@ sys.path.insert(0, str(ROOT))
 load_dotenv(ROOT / ".env")
 
 from db import init_db                              # noqa: E402
-from tracer import log_llm_call, deepeval_enabled  # noqa: E402
+from tracer import log_llm_call  # noqa: E402
 
 @st.cache_resource(show_spinner=False)
 def _db_ready() -> bool:
@@ -30,7 +30,6 @@ def _db_ready() -> bool:
         return False
 
 DB_ON = _db_ready()
-CONFIDENT_ON = deepeval_enabled()
 
 def _safe_log(**kwargs) -> str | None:
     """Write to Postgres + Confident AI. Returns shared trace_id."""
