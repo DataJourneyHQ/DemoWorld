@@ -85,22 +85,13 @@ def _send_to_confident(
 ) -> None:
     tag = run_label or f"{model_type}:{mode}"
 
+    # @observe captures the function arg as input and return value as output
     @observe(type="llm", model=model_id, name=f"{tag}:{model_id}")
-    def _run() -> str:
-        update_llm_span(
-            input=prompt,
-            output=output if not error else f"ERROR: {error}",
-            metadata={
-                "db_trace_id": trace_id,
-                "model_type":  model_type,
-                "mode":        mode,
-                "elapsed_sec": round(elapsed_sec, 3),
-                "error":       error or "",
-            },
-        )
-        return output
+    def _run(input: str) -> str:
+        update_llm_span(model=model_id)
+        return output if not error else f"ERROR: {error}"
 
-    _run()
+    _run(prompt)
     try:
         trace_manager.post_trace()  # type: ignore[attr-defined]
     except Exception:
