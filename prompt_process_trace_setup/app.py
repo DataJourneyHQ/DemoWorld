@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT))
 
 load_dotenv(ROOT / ".env")
 
-from db import init_db, log_run  # noqa: E402
+from db import init_db, log_run, log_comparison_runs  # noqa: E402
 
 @st.cache_resource(show_spinner=False)
 def _db_ready() -> bool:
@@ -35,6 +35,14 @@ def _safe_log(**kwargs) -> None:
         return
     try:
         log_run(**kwargs)
+    except Exception as exc:
+        st.toast(f"DB log failed: {exc}", icon="⚠️")
+
+def _safe_log_comparison(prompt: str, results: list[dict]) -> None:
+    if not DB_ON:
+        return
+    try:
+        log_comparison_runs(prompt, results)
     except Exception as exc:
         st.toast(f"DB log failed: {exc}", icon="⚠️")
 
@@ -78,7 +86,7 @@ def get_catalog(token: str) -> list[dict]:
     return [m for _, m in scored[:15]]
 
 
-def call_model(model_id: str, is_oss: bool, prompt: str) -> tuple[str, str | None, float]:
+def call_model(model_id: str, is_oss: bool, prompt: str) -> tuple[str, str | None, float, int | None, int | None]:
     """Call one model. Returns (output, error, elapsed_seconds)."""
     try:
         api_key  = os.getenv("HF_TOKEN") if is_oss else os.getenv("GITHUB_TOKEN")
@@ -115,7 +123,7 @@ def save_output(output: str, label: str) -> Path:
     return out_file
 
 
-def model_selector(col_label: str, key_prefix: str, top_models: list[dict]) -> tuple[str | None, bool]:
+def model_selector(key_prefix: str, top_models: list[dict]) -> tuple[str | None, bool]:
     """Renders model-type radio + model picker. Returns (model_id, is_oss)."""
     model_type = st.radio(
         f"Model type",
@@ -171,7 +179,7 @@ st.divider()
 # ══════════════════════════════════════════════════════════════════════════════
 if mode == "Single model":
     st.subheader("① Select a model")
-    model_id, is_oss = model_selector("Model", "single", top_models)
+    model_id, is_oss = model_selector("single", top_models)
 
     st.divider()
     st.subheader("② Prompt")
@@ -228,7 +236,7 @@ else:
 
     with col_a:
         st.markdown("#### Model A")
-        model_a, is_oss_a = model_selector("Model A", "cmp_a", top_models)
+        model_a, is_oss_a = model_selector("cmp_a", top_models)
 
     with col_sep:
         st.markdown(
@@ -238,7 +246,7 @@ else:
 
     with col_b:
         st.markdown("#### Model B")
-        model_b, is_oss_b = model_selector("Model B", "cmp_b", top_models)
+        model_b, is_oss_b = model_selector("cmp_b", top_models)
 
     st.divider()
     st.subheader("② Prompt  *(shared)*")
