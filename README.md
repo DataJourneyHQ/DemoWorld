@@ -1,6 +1,6 @@
 # Exciting Demos
 
-#### Full architecture — end to end
+#### Architecture <> System to evaluate open-source vs closed-source 
 
 ```mermaid
 flowchart TD
@@ -50,7 +50,6 @@ model tracing dashboard"]]
 4. Every run is logged to Postgres — single row for `oss`/`commercial`, two linked rows (same `run_group_id`) for `osscom`
 5. **Metabase** connects directly to the Railway Postgres and visualises model usage, latency, and token consumption
 
-## System to evaluate open-source vs closed-source models powered by GitHub models 
 
 <!-- <img width="2572" height="500" alt="Screenshot 2026-04-01 at 9 39 30 AM" src="https://github.com/user-attachments/assets/6d716417-a3cb-4d8e-8250-a36f1f698bd9" /> -->
 
