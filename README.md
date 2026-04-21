@@ -1,10 +1,54 @@
 # Exciting Demos
 
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/efa7b04e-dce2-43c4-97dd-c269ff269d94" width="45%" />
-  <img src="https://github.com/user-attachments/assets/994de359-1c91-450f-9189-9275621eb1af" width="45%" />
-</p>
+#### Full architecture — end to end
 
+```mermaid
+flowchart TD
+    U([👤 User]) -->|prompt + model choice| APP
+
+    subgraph RW["☁️ Railway"]
+        APP[["app.py
+Streamlit UI"]]
+        DB[("🐘 Postgres
+llm_runs")]
+        APP -->|log_run / log_comparison_runs| DB
+    end
+
+    subgraph Providers["🤖 Model Providers"]
+        HF["🔓 HuggingFace Router
+gpt-oss-120b"]
+        GH["🏢 GitHub Models
+dynamically picked"]
+    end
+
+    CAT["evaluate/
+prompt_evaluator.py"] -. scores + picks .-> GH
+
+    APP -->|single: HF_TOKEN| HF
+    APP -->|single: GITHUB_TOKEN| GH
+    APP -->|comparison: parallel| HF
+    APP -->|comparison: parallel| GH
+
+    HF -->|output + prompt_tokens
++ output_tokens| APP
+    GH -->|output + prompt_tokens
++ output_tokens| APP
+
+    DB -->|SQL queries| MB[["📊 Metabase
+model tracing dashboard"]]
+
+    classDef store fill:#1f6feb,stroke:#fff,color:#fff
+    classDef dash fill:#6e40c9,stroke:#fff,color:#fff
+    class DB store
+    class MB dash
+```
+
+**Flow:**
+1. User selects a model (OSS, Commercial, or both) and submits a prompt
+2. `app.py` calls the provider(s) — parallel via `ThreadPoolExecutor` in comparison mode
+3. Token counts (`prompt_tokens`, `output_tokens`) are extracted from `response.usage`
+4. Every run is logged to Postgres — single row for `oss`/`commercial`, two linked rows (same `run_group_id`) for `osscom`
+5. **Metabase** connects directly to the Railway Postgres and visualises model usage, latency, and token consumption
 
 ## System to evaluate open-source vs closed-source models powered by GitHub models 
 
@@ -118,55 +162,6 @@ streamlit run app.py
 | `output_tokens` | int | from `response.usage` |
 | `mode` | text | `single` · `comparison` |
 
-#### Full architecture — end to end
-
-```mermaid
-flowchart TD
-    U([👤 User]) -->|prompt + model choice| APP
-
-    subgraph RW["☁️ Railway"]
-        APP[["app.py
-Streamlit UI"]]
-        DB[("🐘 Postgres
-llm_runs")]
-        APP -->|log_run / log_comparison_runs| DB
-    end
-
-    subgraph Providers["🤖 Model Providers"]
-        HF["🔓 HuggingFace Router
-gpt-oss-120b"]
-        GH["🏢 GitHub Models
-dynamically picked"]
-    end
-
-    CAT["evaluate/
-prompt_evaluator.py"] -. scores + picks .-> GH
-
-    APP -->|single: HF_TOKEN| HF
-    APP -->|single: GITHUB_TOKEN| GH
-    APP -->|comparison: parallel| HF
-    APP -->|comparison: parallel| GH
-
-    HF -->|output + prompt_tokens
-+ output_tokens| APP
-    GH -->|output + prompt_tokens
-+ output_tokens| APP
-
-    DB -->|SQL queries| MB[["📊 Metabase
-model tracing dashboard"]]
-
-    classDef store fill:#1f6feb,stroke:#fff,color:#fff
-    classDef dash fill:#6e40c9,stroke:#fff,color:#fff
-    class DB store
-    class MB dash
-```
-
-**Flow:**
-1. User selects a model (OSS, Commercial, or both) and submits a prompt
-2. `app.py` calls the provider(s) — parallel via `ThreadPoolExecutor` in comparison mode
-3. Token counts (`prompt_tokens`, `output_tokens`) are extracted from `response.usage`
-4. Every run is logged to Postgres — single row for `oss`/`commercial`, two linked rows (same `run_group_id`) for `osscom`
-5. **Metabase** connects directly to the Railway Postgres and visualises model usage, latency, and token consumption
 
 #### References
 - [DataJourneyHQ/list-github-models](https://github.com/DataJourneyHQ/list-github-models)
