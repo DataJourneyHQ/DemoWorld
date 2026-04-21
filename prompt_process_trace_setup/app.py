@@ -17,8 +17,7 @@ sys.path.insert(0, str(ROOT))
 
 load_dotenv(ROOT / ".env")
 
-from db import init_db                              # noqa: E402
-from tracer import log_llm_call  # noqa: E402
+from db import init_db, log_run  # noqa: E402
 
 @st.cache_resource(show_spinner=False)
 def _db_ready() -> bool:
@@ -31,15 +30,13 @@ def _db_ready() -> bool:
 
 DB_ON = _db_ready()
 
-def _safe_log(**kwargs) -> str | None:
-    """Write to Postgres + Confident AI. Returns shared trace_id."""
-    if not DB_ON and not CONFIDENT_ON:
-        return None
+def _safe_log(**kwargs) -> None:
+    if not DB_ON:
+        return
     try:
-        return log_llm_call(**kwargs)
+        log_run(**kwargs)
     except Exception as exc:
-        st.toast(f"Trace log failed: {exc}", icon="⚠️")
-        return None
+        st.toast(f"DB log failed: {exc}", icon="⚠️")
 
 # ── constants ─────────────────────────────────────────────────────────────────
 OSS_MODEL       = "openai/gpt-oss-120b:novita"
