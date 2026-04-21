@@ -99,9 +99,12 @@ def call_model(model_id: str, is_oss: bool, prompt: str) -> tuple[str, str | Non
             ],
         )
         elapsed = time.perf_counter() - t0
-        return response.choices[0].message.content, None, elapsed
+        output = response.choices[0].message.content
+        pt = getattr(response.usage, "prompt_tokens", None)
+        ot = getattr(response.usage, "completion_tokens", None)
+        return output, None, elapsed, pt, ot
     except Exception as exc:
-        return "", str(exc), 0.0
+        return "", str(exc), 0.0, None, None
 
 
 def save_output(output: str, label: str) -> Path:
@@ -191,7 +194,7 @@ if mode == "Single model":
 
     if run:
         with st.spinner(f"Running `{model_id}` …"):
-            output, err, elapsed = call_model(model_id, is_oss, prompt_text)
+            output, err, elapsed, pt, ot = call_model(model_id, is_oss, prompt_text)
         _safe_log(
             model_id=model_id,
             model_type="oss" if is_oss else "commercial",
@@ -200,6 +203,8 @@ if mode == "Single model":
             error=err,
             elapsed_sec=elapsed,
             mode="single",
+            prompt_tokens=pt,
+            output_tokens=ot,
         )
         if err:
             st.error(f"❌ {err}")
@@ -265,21 +270,17 @@ else:
             with ThreadPoolExecutor(max_workers=2) as pool:
                 fut_a = pool.submit(call_model, model_a, is_oss_a, prompt_text)
                 fut_b = pool.submit(call_model, model_b, is_oss_b, prompt_text)
-                out_a, err_a, elapsed_a = fut_a.result()
-                out_b, err_b, elapsed_b = fut_b.result()
+                out_a, err_a, elapsed_a, pt_a, ot_a = fut_a.result()
+                out_b, err_b, elapsed_b, pt_b, ot_b = fut_b.result()
 
-        _safe_log(
-            model_id=model_a,
-            model_type="oss" if is_oss_a else "commercial",
-            prompt=prompt_text, output=out_a, error=err_a,
-            elapsed_sec=elapsed_a, mode="comparison",
-        )
-        _safe_log(
-            model_id=model_b,
-            model_type="oss" if is_oss_b else "commercial",
-            prompt=prompt_text, output=out_b, error=err_b,
-            elapsed_sec=elapsed_b, mode="comparison",
-        )
+        _safe_log_comparison(prompt_text, [
+            dict(model_id=model_a, model_type="oss" if is_oss_a else "commercial",
+                 output=out_a, error=err_a, elapsed_sec=elapsed_a,
+                 prompt_tokens=pt_a, output_tokens=ot_a),
+            dict(model_id=model_b, model_type="oss" if is_oss_b else "commercial",
+                 output=out_b, error=err_b, elapsed_sec=elapsed_b,
+                 prompt_tokens=pt_b, output_tokens=ot_b),
+        ])
 
         st.divider()
         res_a, res_b = st.columns(2)
