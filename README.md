@@ -1,6 +1,6 @@
 # Exciting Demos
 
-#### Architecture <> System to evaluate open-source vs closed-source 
+### Architecture <> System to evaluate open-source vs closed-source 
 
 ```mermaid
 flowchart TD
