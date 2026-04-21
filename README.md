@@ -6,7 +6,7 @@
 </p>
 
 
-### System to evalute Open source Vs Closed source models powered by Github Models 
+## System to evaluate open-source vs closed-source models powered by GitHub models 
 
 <!-- <img width="2572" height="500" alt="Screenshot 2026-04-01 at 9 39 30 AM" src="https://github.com/user-attachments/assets/6d716417-a3cb-4d8e-8250-a36f1f698bd9" /> -->
 
