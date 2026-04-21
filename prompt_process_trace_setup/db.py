@@ -81,7 +81,7 @@ def log_comparison_runs(prompt: str, results: list[dict]) -> str:
     for r in results:
         log_run(
             model_id=r["model_id"],
-            model_type="osscom",
+            model_type=r.get("model_type", "osscom"),
             prompt=prompt,
             output=r.get("output"),
             error=r.get("error"),

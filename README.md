@@ -70,37 +70,78 @@ The output **looks completely valid** — proper markdown, real project names, G
 
 <img width="2572" height="500" alt="Screenshot 2026-04-01 at 9 39 30 AM" src="https://github.com/user-attachments/assets/6d716417-a3cb-4d8e-8250-a36f1f698bd9" />
 
-A Streamlit app that runs the **same prompt** against an OSS model (`gpt-oss-120b` via HuggingFace) and a **commercial GitHub Model** (picked dynamically from the live catalog), side by side — then logs every call for later inspection.
+A Streamlit app that runs the **same prompt** against an OSS model (`gpt-oss-120b` via HuggingFace) and a **commercial GitHub Model** (picked dynamically from the live catalog), side by side — then logs every call to Postgres on Railway.
 
-**Deployed on [Railway](https://railway.app)** with a linked PostgreSQL service. Every run is written to the DB and, if `CONFIDENT_API_KEY` is set, mirrored to the Confident AI dashboard using the same `trace_id`.
+---
 
-#### Trace flow
+#### Scenario 1 — Single OSS model run
 
 ```mermaid
 flowchart LR
-    U([👤 User]) --> APP
-
-    subgraph RW["☁️ Railway"]
-        APP[["app.py<br/>Streamlit UI"]]
-        TR{{"tracer.py<br/>log_llm_call()"}}
-        DB[("🐘 Postgres<br/>llm_runs")]
-        APP --> TR
-        TR -->|row + trace_id| DB
-    end
-
-    APP -->|call| HF["🔓 HF Router<br/>gpt-oss-120b"]
-    APP -->|call| GH["🏢 GitHub Models"]
-    TR -. optional mirror .-> CAI[["🧪 Confident AI"]]
+    U([👤 User]) -->|prompt| APP
+    APP[["app.py"]] -->|HF_TOKEN| HF["🔓 HuggingFace Router
+gpt-oss-120b"]
+    HF -->|output + usage| APP
+    APP -->|log_run
+model_type=oss| DB[("🐘 Postgres
+llm_runs")]
 ```
 
-**One call → two sinks, one shared `trace_id`.** Postgres is the source of truth; Confident AI is the dashboard layer.
+---
+
+#### Scenario 2 — Single Commercial model run
+
+```mermaid
+flowchart LR
+    U([👤 User]) -->|prompt| APP
+    APP[["app.py"]] -->|GITHUB_TOKEN| CAT["evaluate/prompt_evaluator.py
+fetch + score catalog"]
+    CAT -->|best model_id| APP
+    APP -->|GITHUB_TOKEN| GH["🏢 GitHub Models
+dynamically picked"]
+    GH -->|output + usage| APP
+    APP -->|log_run
+model_type=commercial| DB[("🐘 Postgres
+llm_runs")]
+```
+
+---
+
+#### Scenario 3 — Side-by-side comparison (osscom)
+
+```mermaid
+flowchart LR
+    U([👤 User]) -->|prompt| APP
+
+    APP[["app.py
+ThreadPoolExecutor"]] -->|parallel| HF["🔓 HuggingFace Router
+gpt-oss-120b"]
+    APP -->|parallel| GH["🏢 GitHub Models"]
+
+    HF -->|out_a + tokens| APP
+    GH -->|out_b + tokens| APP
+
+    APP -->|log_comparison_runs
+run_group_id shared| DB
+
+    subgraph DB["🐘 Postgres · llm_runs"]
+        RA["row A
+model_type=oss
+run_group_id=xyz"]
+        RB["row B
+model_type=commercial
+run_group_id=xyz"]
+    end
+```
+
+---
 
 #### Run it locally
 
 ```bash
 cd prompt_process_trace_setup
 pip install -r requirements.txt
-cp .env.example .env          # fill in GITHUB_TOKEN, HF_TOKEN, DATABASE_URL, (optional) CONFIDENT_API_KEY
+cp .env.example .env          # fill in GITHUB_TOKEN, HF_TOKEN, DATABASE_URL
 streamlit run app.py
 ```
 
@@ -108,7 +149,7 @@ streamlit run app.py
 
 1. New project → deploy from this repo (root `prompt_process_trace_setup/`)
 2. Add a **PostgreSQL** plugin → Railway injects `DATABASE_URL` automatically
-3. Set `GITHUB_TOKEN`, `HF_TOKEN`, and optionally `CONFIDENT_API_KEY` as service variables
+3. Set `GITHUB_TOKEN` and `HF_TOKEN` as service variables
 4. First request auto-creates the `llm_runs` table
 
 #### Key files
@@ -116,11 +157,26 @@ streamlit run app.py
 | File | Purpose |
 |---|---|
 | `app.py` | Streamlit UI — single or side-by-side mode |
-| `tracer.py` | Unified logger — writes to Postgres + Confident AI |
-| `db.py` | Postgres schema + `log_run()` |
+| `db.py` | Postgres schema · `log_run()` · `log_comparison_runs()` |
 | `evaluate/prompt_evaluator.py` | Fetches the live GitHub Models catalog and picks the best commercial model |
 | `prompt/prompt.md` | The test prompt (movie review of *Project Hail Mary*) |
 
+#### DB schema
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | serial | primary key |
+| `run_at` | timestamptz | auto |
+| `run_group_id` | text | shared UUID for osscom comparison rows |
+| `model_id` | text | full model identifier |
+| `model_type` | text | `oss` · `commercial` · `osscom` |
+| `prompt` | text | |
+| `output` | text | |
+| `error` | text | null on success |
+| `elapsed_sec` | float | wall-clock time |
+| `prompt_tokens` | int | from `response.usage` |
+| `output_tokens` | int | from `response.usage` |
+| `mode` | text | `single` · `comparison` |
+
 #### References
 - [DataJourneyHQ/list-github-models](https://github.com/DataJourneyHQ/list-github-models)
-- [deepeval / Confident AI](https://github.com/confident-ai/deepeval)
