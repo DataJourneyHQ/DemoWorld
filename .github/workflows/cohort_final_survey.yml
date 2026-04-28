@@ -1,0 +1,146 @@
+name: 🎧 DJHQ Academy — Cohort 01 Survey
+
+on:
+  workflow_dispatch:
+    inputs:
+
+      # ─── SECTION 1: OVERALL EXPERIENCE ───────────────────────────────────────
+
+      overall_rating:
+        description: "⭐ Overall, how would you rate Cohort 01? (1 = Poor · 5 = Excellent)"
+        required: true
+        type: choice
+        options:
+          - "5 — Excellent"
+          - "4 — Good"
+          - "3 — Average"
+          - "2 — Below Average"
+          - "1 — Poor"
+
+      goals_achieved:
+        description: "🎯 Did the program help you achieve your goals?"
+        required: true
+        type: choice
+        options:
+          - "Yes, fully"
+          - "Yes, mostly"
+          - "Partially"
+          - "Not really"
+          - "No"
+
+      # ─── SECTION 2: CONTENT & CURRICULUM ─────────────────────────────────────
+
+      content_quality:
+        description: "📚 How was the quality of the curriculum and learning materials?"
+        required: true
+        type: choice
+        options:
+          - "Outstanding"
+          - "Good"
+          - "Average"
+          - "Needs improvement"
+
+      most_valuable:
+        description: "💡 What was the most valuable part of the program? (be specific)"
+        required: true
+        type: string
+
+      least_valuable:
+        description: "🔧 What was the least valuable or needs improvement?"
+        required: false
+        type: string
+
+      # ─── SECTION 3: COMMUNITY & SUPPORT ──────────────────────────────────────
+
+      community_rating:
+        description: "🤝 How was the community and peer support throughout the cohort?"
+        required: true
+        type: choice
+        options:
+          - "5 — Excellent"
+          - "4 — Good"
+          - "3 — Average"
+          - "2 — Below Average"
+          - "1 — Poor"
+
+      mentor_support:
+        description: "🎙️ How satisfied were you with mentor/instructor support?"
+        required: true
+        type: choice
+        options:
+          - "Very satisfied"
+          - "Satisfied"
+          - "Neutral"
+          - "Unsatisfied"
+          - "Very unsatisfied"
+
+      # ─── SECTION 4: OUTCOMES ─────────────────────────────────────────────────
+
+      biggest_win:
+        description: "🏆 What's your biggest win or takeaway from Cohort 01?"
+        required: true
+        type: string
+
+      recommend:
+        description: "📣 Would you recommend DJHQ Academy to others?"
+        required: true
+        type: choice
+        options:
+          - "Definitely yes"
+          - "Probably yes"
+          - "Not sure"
+          - "Probably not"
+          - "Definitely not"
+
+      # ─── SECTION 5: LOOKING AHEAD ────────────────────────────────────────────
+
+      next_cohort:
+        description: "🔄 Would you join or continue with Cohort 02?"
+        required: true
+        type: boolean
+        default: true
+
+      suggestions:
+        description: "✍️ Any final suggestions or ideas for future cohorts?"
+        required: false
+        type: string
+
+jobs:
+  collect-response:
+    name: 📥 Record Survey Response
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🎧 Thank You!
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  DJHQ ACADEMY — COHORT 01 · END OF PROGRAM SURVEY"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "  Submitted by : ${{ github.actor }}"
+          echo "  Date         : $(date -u '+%Y-%m-%d %H:%M UTC')"
+          echo ""
+          echo "── EXPERIENCE ──────────────────────────────────"
+          echo "  Overall Rating   : ${{ inputs.overall_rating }}"
+          echo "  Goals Achieved   : ${{ inputs.goals_achieved }}"
+          echo ""
+          echo "── CONTENT ─────────────────────────────────────"
+          echo "  Content Quality  : ${{ inputs.content_quality }}"
+          echo "  Most Valuable    : ${{ inputs.most_valuable }}"
+          echo "  Needs Work       : ${{ inputs.least_valuable }}"
+          echo ""
+          echo "── COMMUNITY ───────────────────────────────────"
+          echo "  Community Rating : ${{ inputs.community_rating }}"
+          echo "  Mentor Support   : ${{ inputs.mentor_support }}"
+          echo ""
+          echo "── OUTCOMES ────────────────────────────────────"
+          echo "  Biggest Win      : ${{ inputs.biggest_win }}"
+          echo "  Would Recommend  : ${{ inputs.recommend }}"
+          echo ""
+          echo "── NEXT STEPS ──────────────────────────────────"
+          echo "  Joining Cohort 02 : ${{ inputs.next_cohort }}"
+          echo "  Suggestions       : ${{ inputs.suggestions }}"
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  ✅ Response recorded. Thank you! 🙏"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
