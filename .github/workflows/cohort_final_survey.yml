@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
 
-     name:
+      name:
         description: "First + Last Name"
         required: true
         type: string
