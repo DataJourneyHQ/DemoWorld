@@ -4,6 +4,11 @@ on:
   workflow_dispatch:
     inputs:
 
+     name:
+        description: "First + Last Name"
+        required: true
+        type: string
+
       overall_rating:
         description: "⭐ Overall, how would you rate Cohort 01? (1 = Poor · 5 = Excellent)"
         required: true
