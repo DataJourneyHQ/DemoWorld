@@ -1,0 +1,29 @@
+# configures to run for two repos (matrix format)
+name: github-repo-stats
+concurrency: github-repo-stats
+permissions:
+  contents: read
+on:
+  schedule:
+    - cron: "50 23 * * *"
+  workflow_dispatch:
+
+jobs:
+  run-ghrs-with-matrix:
+    name: github-repo-stats
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        # The repositories to generate reports for.
+        statsRepo: ['DataJourneyhq/demoworld']
+      # Do not cancel&fail all remaining jobs upon first job failure.
+      fail-fast: false
+      # Help avoid commit conflicts. Note(JP): this should not be
+      # necessary anymore, feedback appreciated
+      max-parallel: 1
+    steps:
+      - name: run-ghrs
+        uses: jgehrcke/github-repo-stats@RELEASE
+        with:
+          repository: ${{ matrix.statsRepo }}
+          ghtoken: ${{ secrets.ghrs_github_api_token }}
